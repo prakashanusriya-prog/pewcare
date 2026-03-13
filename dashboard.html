@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PawCare – Pet Care Ecosystem Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f0d;
+    --surface: #111a15;
+    --surface2: #172110;
+    --accent: #5dff8a;
+    --accent2: #ff8c42;
+    --accent3: #42c8ff;
+    --text: #e8f5ec;
+    --muted: #6b8f74;
+    --border: #1e3024;
+    --danger: #ff4f4f;
+    --warn: #ffd166;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    overflow-x: hidden;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 240px;
+    min-height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 28px 0;
+    position: fixed;
+    top: 0; left: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.5rem;
+    color: var(--accent);
+    padding: 0 24px 32px;
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo span { color: var(--text); }
+
+  .nav-section {
+    padding: 0 12px;
+    flex: 1;
+  }
+  .nav-label {
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 16px 12px 8px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 0.88rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    margin-bottom: 2px;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active {
+    background: rgba(93,255,138,0.1);
+    color: var(--accent);
+    border: 1px solid rgba(93,255,138,0.2);
+  }
+  .nav-icon { font-size: 1.1rem; width: 20px; text-align: center; }
+
+  .sidebar-footer {
+    padding: 20px 24px;
+    border-top: 1px solid var(--border);
+  }
+  .vet-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent3));
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.8rem; color: #000;
+  }
+  .vet-info { flex: 1; }
+  .vet-name { font-size: 0.82rem; font-weight: 600; color: var(--text); }
+  .vet-role { font-size: 0.7rem; color: var(--muted); }
+
+  /* ── MAIN ── */
+  .main {
+    margin-left: 240px;
+    flex: 1;
+    padding: 32px;
+    max-width: calc(100vw - 240px);
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+  }
+  .page-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .page-title span { color: var(--accent); }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .search-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 16px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    width: 220px;
+    outline: none;
+    transition: border 0.2s;
+  }
+  .search-bar:focus { border-color: var(--accent); }
+  .search-bar::placeholder { color: var(--muted); }
+  .notif-btn {
+    width: 38px; height: 38px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 1rem;
+    position: relative;
+  }
+  .notif-dot {
+    position: absolute; top: 7px; right: 7px;
+    width: 7px; height: 7px;
+    background: var(--danger);
+    border-radius: 50%;
+  }
+
+  /* ── STATS GRID ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+    cursor: pointer;
+  }
+  .stat-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    filter: blur(30px);
+    opacity: 0.15;
+  }
+  .stat-card.green::before { background: var(--accent); }
+  .stat-card.orange::before { background: var(--accent2); }
+  .stat-card.blue::before { background: var(--accent3); }
+  .stat-card.red::before { background: var(--danger); }
+
+  .stat-icon { font-size: 1.6rem; margin-bottom: 12px; }
+  .stat-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-label { font-size: 0.78rem; color: var(--muted); }
+  .stat-change {
+    position: absolute;
+    top: 20px; right: 16px;
+    font-size: 0.72rem;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+  .stat-change.up { background: rgba(93,255,138,0.15); color: var(--accent); }
+  .stat-change.down { background: rgba(255,79,79,0.15); color: var(--danger); }
+
+  /* ── CONTENT GRID ── */
+  .content-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text);
+  }
+  .badge {
+    font-size: 0.72rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+  .badge-green { background: rgba(93,255,138,0.15); color: var(--accent); }
+  .badge-orange { background: rgba(255,140,66,0.15); color: var(--accent2); }
+  .badge-blue { background: rgba(66,200,255,0.15); color: var(--accent3); }
+
+  /* ── APPOINTMENTS TABLE ── */
+  .appt-table { width: 100%; border-collapse: collapse; }
+  .appt-table th {
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: left;
+    padding: 0 12px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .appt-table td {
+    padding: 12px;
+    font-size: 0.85rem;
+    border-bottom: 1px solid rgba(30,48,36,0.6);
+    vertical-align: middle;
+  }
+  .appt-table tr:last-child td { border-bottom: none; }
+  .appt-table tr:hover td { background: var(--surface2); }
+
+  .pet-cell { display: flex; align-items: center; gap: 10px; }
+  .pet-avatar {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+  .pet-name { font-weight: 500; color: var(--text); font-size: 0.85rem; }
+  .pet-breed { font-size: 0.72rem; color: var(--muted); }
+
+  .status-pill {
+    font-size: 0.72rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+    display: inline-block;
+  }
+  .status-confirmed { background: rgba(93,255,138,0.12); color: var(--accent); border: 1px solid rgba(93,255,138,0.2); }
+  .status-pending { background: rgba(255,209,102,0.12); color: var(--warn); border: 1px solid rgba(255,209,102,0.2); }
+  .status-emergency { background: rgba(255,79,79,0.12); color: var(--danger); border: 1px solid rgba(255,79,79,0.2); }
+
+  /* ── SOS ALERTS ── */
+  .sos-list { display: flex; flex-direction: column; gap: 12px; }
+  .sos-item {
+    background: var(--surface2);
+    border: 1px solid rgba(255,79,79,0.2);
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    animation: pulse-border 2s infinite;
+  }
+  @keyframes pulse-border {
+    0%, 100% { border-color: rgba(255,79,79,0.2); }
+    50% { border-color: rgba(255,79,79,0.6); }
+  }
+  .sos-icon {
+    width: 36px; height: 36px;
+    background: rgba(255,79,79,0.15);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .sos-info { flex: 1; }
+  .sos-name { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+  .sos-detail { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+  .sos-time { font-size: 0.68rem; color: var(--danger); font-weight: 600; }
+  .sos-btn {
+    background: var(--danger);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+  }
+  .sos-btn:hover { opacity: 0.85; }
+
+  /* ── BOTTOM GRID ── */
+  .bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+  }
+
+  /* ── HEALTH CHART (CSS bars) ── */
+  .chart-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    height: 120px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+  .bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .bar {
+    width: 100%;
+    border-radius: 4px 4px 0 0;
+    background: linear-gradient(180deg, var(--accent), rgba(93,255,138,0.3));
+    transition: height 0.8s cubic-bezier(0.34,1.56,0.64,1);
+    min-height: 4px;
+  }
+  .bar.orange { background: linear-gradient(180deg, var(--accent2), rgba(255,140,66,0.3)); }
+  .bar-label { font-size: 0.65rem; color: var(--muted); }
+
+  /* ── ADOPTION PANEL ── */
+  .adopt-list { display: flex; flex-direction: column; gap: 10px; }
+  .adopt-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    background: var(--surface2);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    transition: border-color 0.2s;
+    cursor: pointer;
+  }
+  .adopt-item:hover { border-color: var(--accent3); }
+  .adopt-emoji { font-size: 1.5rem; width: 40px; height: 40px; background: var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .adopt-info { flex: 1; }
+  .adopt-name { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+  .adopt-meta { font-size: 0.7rem; color: var(--muted); }
+  .adopt-tag {
+    font-size: 0.68rem;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+  .tag-available { background: rgba(93,255,138,0.12); color: var(--accent); }
+  .tag-pending { background: rgba(255,209,102,0.12); color: var(--warn); }
+
+  /* ── INVENTORY ── */
+  .inv-list { display: flex; flex-direction: column; gap: 10px; }
+  .inv-item { display: flex; align-items: center; gap: 12px; }
+  .inv-icon { font-size: 1.1rem; width: 32px; text-align: center; }
+  .inv-info { flex: 1; }
+  .inv-name { font-size: 0.82rem; font-weight: 500; color: var(--text); }
+  .inv-bar-wrap {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 4px;
+    overflow: hidden;
+  }
+  .inv-bar { height: 100%; border-radius: 2px; transition: width 1s; }
+  .inv-qty { font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
+
+  /* ── HEATMAP ── */
+  .heatmap-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+  .hmap-cell {
+    aspect-ratio: 1;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .hmap-cell:hover { transform: scale(1.3); }
+  .h0 { background: var(--border); }
+  .h1 { background: rgba(93,255,138,0.2); }
+  .h2 { background: rgba(93,255,138,0.4); }
+  .h3 { background: rgba(93,255,138,0.65); }
+  .h4 { background: var(--accent); }
+  .hmap-days { display: flex; justify-content: space-between; }
+  .hmap-day { font-size: 0.6rem; color: var(--muted); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .stat-card { animation: fadeUp 0.5s ease both; }
+  .stat-card:nth-child(1) { animation-delay: 0.05s; }
+  .stat-card:nth-child(2) { animation-delay: 0.1s; }
+  .stat-card:nth-child(3) { animation-delay: 0.15s; }
+  .stat-card:nth-child(4) { animation-delay: 0.2s; }
+  .card { animation: fadeUp 0.5s ease 0.25s both; }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ── ACTIVE NAV INDICATOR ── */
+  .nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 50%; transform: translateY(-50%);
+    width: 3px; height: 60%;
+    background: var(--accent);
+    border-radius: 0 2px 2px 0;
+  }
+  .nav-item { position: relative; }
+
+  .view-all {
+    font-size: 0.78rem;
+    color: var(--muted);
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .view-all:hover { color: var(--accent); }
+
+  .time-chip {
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">🐾 <span>Paw</span>Care</div>
+  <nav class="nav-section">
+    <div class="nav-label">Main</div>
+    <div class="nav-item active"><span class="nav-icon">🏠</span> Dashboard</div>
+    <div class="nav-item"><span class="nav-icon">📅</span> Appointments</div>
+    <div class="nav-item"><span class="nav-icon">🐶</span> Pet Records</div>
+    <div class="nav-item"><span class="nav-icon">🚨</span> Emergency SOS</div>
+
+    <div class="nav-label">Management</div>
+    <div class="nav-item"><span class="nav-icon">🏥</span> Vet Clinic</div>
+    <div class="nav-item"><span class="nav-icon">🏠</span> Shelter Panel</div>
+    <div class="nav-item"><span class="nav-icon">🛒</span> Pet Store</div>
+    <div class="nav-item"><span class="nav-icon">📊</span> Analytics</div>
+
+    <div class="nav-label">Community</div>
+    <div class="nav-item"><span class="nav-icon">🌍</span> Disease Map</div>
+    <div class="nav-item"><span class="nav-icon">💬</span> Community</div>
+    <div class="nav-item"><span class="nav-icon">⚙️</span> Settings</div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="vet-profile">
+      <div class="avatar">DR</div>
+      <div class="vet-info">
+        <div class="vet-name">Dr. Riya Sharma</div>
+        <div class="vet-role">Senior Veterinarian</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div>
+      <div class="page-title">Good Morning, <span>Dr. Riya</span> 👋</div>
+      <div style="font-size:0.82rem; color:var(--muted); margin-top:4px;">Friday, 13 March 2026 · 12 appointments today</div>
+    </div>
+    <div class="topbar-right">
+      <input class="search-bar" type="text" placeholder="🔍  Search pets, owners...">
+      <div class="notif-btn">🔔<div class="notif-dot"></div></div>
+      <div class="notif-btn">📋</div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card green">
+      <div class="stat-icon">🐾</div>
+      <div class="stat-value" id="s1">0</div>
+      <div class="stat-label">Total Pets Registered</div>
+      <div class="stat-change up">↑ 12%</div>
+    </div>
+    <div class="stat-card orange">
+      <div class="stat-icon">📅</div>
+      <div class="stat-value" id="s2">0</div>
+      <div class="stat-label">Appointments Today</div>
+      <div class="stat-change up">↑ 3 new</div>
+    </div>
+    <div class="stat-card blue">
+      <div class="stat-icon">🏠</div>
+      <div class="stat-value" id="s3">0</div>
+      <div class="stat-label">Pets for Adoption</div>
+      <div class="stat-change up">↑ 5 new</div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-icon">🚨</div>
+      <div class="stat-value" id="s4">0</div>
+      <div class="stat-label">SOS Alerts Active</div>
+      <div class="stat-change down">⚠ Urgent</div>
+    </div>
+  </div>
+
+  <!-- CONTENT GRID -->
+  <div class="content-grid">
+    <!-- Appointments -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📅 Today's Appointments</div>
+        <span class="view-all">View all →</span>
+      </div>
+      <table class="appt-table">
+        <thead>
+          <tr>
+            <th>Pet / Owner</th>
+            <th>Issue</th>
+            <th>Time</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><div class="pet-cell"><div class="pet-avatar" style="background:rgba(93,255,138,0.1)">🐕</div><div><div class="pet-name">Bruno</div><div class="pet-breed">Golden Retriever · Arjun K.</div></div></div></td>
+            <td style="color:var(--muted);font-size:0.82rem;">Vaccination</td>
+            <td class="time-chip">09:00 AM</td>
+            <td><span class="status-pill status-confirmed">Confirmed</span></td>
+          </tr>
+          <tr>
+            <td><div class="pet-cell"><div class="pet-avatar" style="background:rgba(255,140,66,0.1)">🐈</div><div><div class="pet-name">Luna</div><div class="pet-breed">Persian Cat · Priya M.</div></div></div></td>
+            <td style="color:var(--muted);font-size:0.82rem;">Skin Issue</td>
+            <td class="time-chip">10:30 AM</td>
+            <td><span class="status-pill status-confirmed">Confirmed</span></td>
+          </tr>
+          <tr>
+            <td><div class="pet-cell"><div class="pet-avatar" style="background:rgba(66,200,255,0.1)">🐇</div><div><div class="pet-name">Snowy</div><div class="pet-breed">Rabbit · Meena T.</div></div></div></td>
+            <td style="color:var(--muted);font-size:0.82rem;">Checkup</td>
+            <td class="time-chip">11:00 AM</td>
+            <td><span class="status-pill status-pending">Pending</span></td>
+          </tr>
+          <tr>
+            <td><div class="pet-cell"><div class="pet-avatar" style="background:rgba(255,79,79,0.1)">🐕</div><div><div class="pet-name">Rocky</div><div class="pet-breed">Labrador · Rahul S.</div></div></div></td>
+            <td style="color:var(--danger);font-size:0.82rem;">⚠ Emergency</td>
+            <td class="time-chip">12:15 PM</td>
+            <td><span class="status-pill status-emergency">Emergency</span></td>
+          </tr>
+          <tr>
+            <td><div class="pet-cell"><div class="pet-avatar" style="background:rgba(93,255,138,0.1)">🐦</div><div><div class="pet-name">Tweety</div><div class="pet-breed">Parrot · Sunita R.</div></div></div></td>
+            <td style="color:var(--muted);font-size:0.82rem;">Wing Injury</td>
+            <td class="time-chip">02:00 PM</td>
+            <td><span class="status-pill status-pending">Pending</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SOS Alerts -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🚨 SOS Alerts</div>
+        <span class="badge badge-orange">3 Active</span>
+      </div>
+      <div class="sos-list">
+        <div class="sos-item">
+          <div class="sos-icon">🐕</div>
+          <div class="sos-info">
+            <div class="sos-name">Rocky – Labrador</div>
+            <div class="sos-detail">Owner: Rahul S. · Seizure reported</div>
+            <div class="sos-time">🔴 2 min ago · Koramangala</div>
+          </div>
+          <button class="sos-btn">Respond</button>
+        </div>
+        <div class="sos-item">
+          <div class="sos-icon">🐈</div>
+          <div class="sos-info">
+            <div class="sos-name">Milo – Tabby Cat</div>
+            <div class="sos-detail">Owner: Anjali P. · Breathing issues</div>
+            <div class="sos-time">🔴 8 min ago · Indiranagar</div>
+          </div>
+          <button class="sos-btn">Respond</button>
+        </div>
+        <div class="sos-item">
+          <div class="sos-icon">🐕</div>
+          <div class="sos-info">
+            <div class="sos-name">Max – German Shepherd</div>
+            <div class="sos-detail">Owner: Vikram N. · Poisoning suspected</div>
+            <div class="sos-time">🔴 15 min ago · HSR Layout</div>
+          </div>
+          <button class="sos-btn">Respond</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM GRID -->
+  <div class="bottom-grid">
+
+    <!-- Health Trends Chart -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📈 Health Trends (This Week)</div>
+        <span class="badge badge-green">Live</span>
+      </div>
+      <div class="chart-bars" id="chartBars"></div>
+      <div style="display:flex;gap:16px;margin-top:8px;">
+        <div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:var(--muted)"><div style="width:10px;height:10px;border-radius:2px;background:var(--accent)"></div>Visits</div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:var(--muted)"><div style="width:10px;height:10px;border-radius:2px;background:var(--accent2)"></div>Emergencies</div>
+      </div>
+    </div>
+
+    <!-- Adoption Panel -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🏠 Pets for Adoption</div>
+        <span class="view-all">View all →</span>
+      </div>
+      <div class="adopt-list">
+        <div class="adopt-item">
+          <div class="adopt-emoji">🐕</div>
+          <div class="adopt-info">
+            <div class="adopt-name">Buddy · Beagle · 2 yrs</div>
+            <div class="adopt-meta">Vaccinated · House trained</div>
+          </div>
+          <span class="adopt-tag tag-available">Available</span>
+        </div>
+        <div class="adopt-item">
+          <div class="adopt-emoji">🐈</div>
+          <div class="adopt-info">
+            <div class="adopt-name">Kitty · Siamese · 1 yr</div>
+            <div class="adopt-meta">Vaccinated · Friendly</div>
+          </div>
+          <span class="adopt-tag tag-pending">Pending</span>
+        </div>
+        <div class="adopt-item">
+          <div class="adopt-emoji">🐇</div>
+          <div class="adopt-info">
+            <div class="adopt-name">Thumper · Rabbit · 8 mo</div>
+            <div class="adopt-meta">Healthy · Playful</div>
+          </div>
+          <span class="adopt-tag tag-available">Available</span>
+        </div>
+        <div class="adopt-item">
+          <div class="adopt-emoji">🐦</div>
+          <div class="adopt-info">
+            <div class="adopt-name">Polly · Cockatiel · 3 yrs</div>
+            <div class="adopt-meta">Trained · Talks</div>
+          </div>
+          <span class="adopt-tag tag-available">Available</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inventory + Activity Heatmap -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">💊 Medicine Inventory</div>
+        <span class="badge badge-blue">8 Items</span>
+      </div>
+      <div class="inv-list" style="margin-bottom:20px;">
+        <div class="inv-item">
+          <div class="inv-icon">💉</div>
+          <div class="inv-info">
+            <div class="inv-name">Rabies Vaccine</div>
+            <div class="inv-bar-wrap"><div class="inv-bar" style="width:75%;background:var(--accent)"></div></div>
+          </div>
+          <div class="inv-qty">75 left</div>
+        </div>
+        <div class="inv-item">
+          <div class="inv-icon">💊</div>
+          <div class="inv-info">
+            <div class="inv-name">Antibiotics</div>
+            <div class="inv-bar-wrap"><div class="inv-bar" style="width:30%;background:var(--warn)"></div></div>
+          </div>
+          <div class="inv-qty" style="color:var(--warn)">30 left ⚠</div>
+        </div>
+        <div class="inv-item">
+          <div class="inv-icon">🩺</div>
+          <div class="inv-info">
+            <div class="inv-name">Deworming Tabs</div>
+            <div class="inv-bar-wrap"><div class="inv-bar" style="width:60%;background:var(--accent3)"></div></div>
+          </div>
+          <div class="inv-qty">60 left</div>
+        </div>
+        <div class="inv-item">
+          <div class="inv-icon">🔬</div>
+          <div class="inv-info">
+            <div class="inv-name">Flea Treatment</div>
+            <div class="inv-bar-wrap"><div class="inv-bar" style="width:15%;background:var(--danger)"></div></div>
+          </div>
+          <div class="inv-qty" style="color:var(--danger)">15 left 🔴</div>
+        </div>
+      </div>
+
+      <div class="card-title" style="margin-bottom:10px;font-size:0.85rem;">📅 Visit Activity</div>
+      <div class="heatmap-grid" id="heatmap"></div>
+      <div class="hmap-days">
+        <span class="hmap-day">Mon</span><span class="hmap-day">Tue</span><span class="hmap-day">Wed</span>
+        <span class="hmap-day">Thu</span><span class="hmap-day">Fri</span><span class="hmap-day">Sat</span><span class="hmap-day">Sun</span>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+// Animate counters
+function animateCounter(id, target, duration=1200) {
+  const el = document.getElementById(id);
+  let start = 0;
+  const step = target / (duration / 16);
+  const timer = setInterval(() => {
+    start += step;
+    if (start >= target) { el.textContent = target; clearInterval(timer); }
+    else el.textContent = Math.floor(start);
+  }, 16);
+}
+animateCounter('s1', 1284);
+animateCounter('s2', 12);
+animateCounter('s3', 47);
+animateCounter('s4', 3);
+
+// Build bar chart
+const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const visits = [8, 14, 11, 17, 12, 6, 9];
+const emerg = [1, 2, 0, 3, 2, 1, 0];
+const maxVal = Math.max(...visits);
+const chartEl = document.getElementById('chartBars');
+days.forEach((d, i) => {
+  const wrap = document.createElement('div');
+  wrap.className = 'bar-wrap';
+  const b1 = document.createElement('div');
+  b1.className = 'bar';
+  b1.style.height = '0px';
+  const b2 = document.createElement('div');
+  b2.className = 'bar orange';
+  b2.style.height = '0px';
+  const label = document.createElement('div');
+  label.className = 'bar-label';
+  label.textContent = d;
+  const grp = document.createElement('div');
+  grp.style.cssText = 'display:flex;align-items:flex-end;gap:3px;width:100%';
+  grp.appendChild(b1); grp.appendChild(b2);
+  wrap.appendChild(grp); wrap.appendChild(label);
+  chartEl.appendChild(wrap);
+  setTimeout(() => {
+    b1.style.height = (visits[i]/maxVal * 100) + 'px';
+    b2.style.height = (emerg[i]/maxVal * 100) + 'px';
+  }, 300 + i*60);
+});
+
+// Build heatmap
+const heatEl = document.getElementById('heatmap');
+const heatData = [
+  [2,3,1,4,2,0,1],
+  [1,2,3,2,4,1,0],
+  [3,1,4,1,2,3,1],
+  [0,2,1,3,2,1,4],
+];
+heatData.forEach(week => {
+  week.forEach(val => {
+    const cell = document.createElement('div');
+    cell.className = `hmap-cell h${val}`;
+    cell.title = `${val} visits`;
+    heatEl.appendChild(cell);
+  });
+});
+
+// Nav click
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
